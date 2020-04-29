@@ -8,6 +8,7 @@
 @class CDOCMethod, CDOCProperty;
 
 @interface CDOCProtocol : NSObject
+@property (assign) BOOL shouldRecursivelyVisit;
 
 @property (strong) NSString *name;
 

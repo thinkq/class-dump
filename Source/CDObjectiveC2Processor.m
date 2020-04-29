@@ -20,6 +20,7 @@
 #import "cd_objc2.h"
 #import "CDProtocolUniquer.h"
 #import "CDOCClassReference.h"
+#import "CDVisitorPropertyState.h"
 
 @implementation CDObjectiveC2Processor
 {
@@ -59,6 +60,23 @@
         CDOCCategory *category = [self loadCategoryAtAddress:[cursor readPtr]];
         [self addCategory:category];
     }
+}
+
+- (void)loadUsedMethods {
+    CDLCSegment *textSegment = [self.machOFile segmentWithName:@"__DATA"];
+    CDSection *section = [textSegment sectionWithName:@"__objc_selrefs"];
+    CDMachOFileDataCursor *cursor = [[CDMachOFileDataCursor alloc] initWithSection:section];
+    while ([cursor isAtEnd] == NO) {
+        uint64_t methodNamePtr = [cursor readPtr];
+        NSString *methodName = [self.machOFile stringAtAddress:methodNamePtr];
+        
+        CDOCMethod *method = [[CDOCMethod alloc] initWithName:methodName typeString:nil];
+        [self addUsedMethod:method.name];
+    }
+}
+
+- (void)loadUsedClasses {
+    
 }
 
 - (CDOCProtocol *)protocolAtAddress:(uint64_t)address;
@@ -313,6 +331,25 @@
     for (CDOCProperty *property in [self loadPropertiesAtAddress:objc2ClassData.baseProperties])
         [aClass addProperty:property];
     
+    
+    CDVisitorPropertyState *propertyState = [[CDVisitorPropertyState alloc] initWithProperties:aClass.properties];
+    
+    BOOL hasUnsedMethd = NO;
+    for (CDOCMethod *method in aClass.classMethods) {
+        if (!method.used) {
+            hasUnsedMethd = YES;
+            break;
+        }
+    }
+    for (CDOCMethod *method in aClass.instanceMethods) {
+        CDOCProperty *property = [propertyState propertyForAccessor:method.name];
+        if (!method.used && !property) {
+            hasUnsedMethd = YES;
+            break;
+        }
+    }
+    aClass.shouldRecursivelyVisit = hasUnsedMethd;
+    
     return aClass;
 }
 
@@ -430,6 +467,7 @@
             //NSLog(@"types: %@", types);
             
             CDOCMethod *method = [[CDOCMethod alloc] initWithName:name typeString:types address:objc2Method.imp];
+            method.used = [self isUsedMethod:method.name];
             [methods addObject:method];
         }
     }

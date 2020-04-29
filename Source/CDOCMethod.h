@@ -14,6 +14,8 @@
 @property (readonly) NSString *typeString;
 @property (assign) NSUInteger address;
 
+@property (nonatomic, assign) BOOL used;
+
 - (NSArray *)parsedMethodTypes;
 
 - (void)appendToString:(NSMutableString *)resultString typeController:(CDTypeController *)typeController;

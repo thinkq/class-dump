@@ -17,6 +17,7 @@
 #import "CDOCCategory.h"
 #import "CDSection.h"
 #import "CDProtocolUniquer.h"
+#import "CDOCMethod.h"
 
 // Note: sizeof(long long) == 8 on both 32-bit and 64-bit.  sizeof(uint64_t) == 8.  So use [NSNumber numberWithUnsignedLongLong:].
 
@@ -30,6 +31,8 @@
     NSMutableArray *_categories;
     
     CDProtocolUniquer *_protocolUniquer;
+    
+    NSMutableDictionary *_usedMethods;
 }
 
 - (id)initWithMachOFile:(CDMachOFile *)machOFile;
@@ -40,6 +43,7 @@
         _classesByAddress = [[NSMutableDictionary alloc] init];
         _categories = [[NSMutableArray alloc] init];
         
+        _usedMethods = [[NSMutableDictionary alloc] init];
         _protocolUniquer = [[CDProtocolUniquer alloc] init];
     }
 
@@ -129,6 +133,24 @@
         [_categories addObject:category];
 }
 
+- (void)addUsedMethod:(NSString *)methodName {
+    if (methodName.length > 0) {
+        [_usedMethods setObject:@0 forKey:methodName];
+    }
+}
+
+- (BOOL)isUsedMethod:(NSString *)methodName {
+    if ([methodName hasPrefix:@"."]) {
+        return YES;
+    }
+    if (methodName.length == 0) {
+        return NO;
+    }
+    if ([_usedMethods objectForKey:methodName]) {
+        return YES;
+    }
+    return NO;
+}
 #pragma mark - Processing
 
 - (void)process;
@@ -139,6 +161,9 @@
         //读取LC_DYSYMTAB
         [self.machOFile.dynamicSymbolTable loadSymbols];
         
+        [self loadUsedClasses];
+        [self loadUsedMethods];
+         
         //从__DATA,__objc_protolist 读取解析协议列表
         [self loadProtocols];
         //合并
@@ -184,7 +209,7 @@
 {
     NSMutableArray *classesAndCategories = [[NSMutableArray alloc] init];
     [classesAndCategories addObjectsFromArray:_classes];
-    [classesAndCategories addObjectsFromArray:_categories];
+//    [classesAndCategories addObjectsFromArray:_categories];
 
     [visitor willVisitObjectiveCProcessor:self];
     [visitor visitObjectiveCProcessor:self];
@@ -192,8 +217,8 @@
     // TODO: Sort protocols by dependency
     // TODO: (2004-01-30) It looks like protocols might be defined in more than one file.  i.e. NSObject.
     // TODO: (2004-02-02) Looks like we need to record the order the protocols were encountered, or just always sort protocols
-    for (CDOCProtocol *protocol in [self.protocolUniquer uniqueProtocolsSortedByName])
-        [protocol recursivelyVisit:visitor];
+//    for (CDOCProtocol *protocol in [self.protocolUniquer uniqueProtocolsSortedByName])
+//        [protocol recursivelyVisit:visitor];
 
     if ([[visitor classDump] shouldSortClassesByInheritance]) {
         [classesAndCategories sortTopologically];

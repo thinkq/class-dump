@@ -7,6 +7,7 @@
 @class CDVisitor;
 @class CDOCClass, CDOCCategory;
 @class CDProtocolUniquer;
+@class CDOCMethod;
 
 @interface CDObjectiveCProcessor : NSObject
 
@@ -26,10 +27,17 @@
 
 - (void)addCategory:(CDOCCategory *)category;
 
+- (void)addUsedMethod:(NSString *)methodName;
+- (BOOL)isUsedMethod:(NSString *)methodName;
+
 - (void)process;
 - (void)loadProtocols;
 - (void)loadClasses;
 - (void)loadCategories;
+
+//
+- (void)loadUsedMethods;
+- (void)loadUsedClasses;
 
 - (void)registerTypesWithObject:(CDTypeController *)typeController phase:(NSUInteger)phase;
 - (void)recursivelyVisit:(CDVisitor *)visitor;
