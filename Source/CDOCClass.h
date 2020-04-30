@@ -16,5 +16,6 @@
 @property (strong) NSArray *instanceVariables;
 @property (assign) BOOL isExported;
 @property (assign) BOOL isSwiftClass;
+@property (assign) BOOL isUsed;
 
 @end

@@ -33,6 +33,8 @@
     CDProtocolUniquer *_protocolUniquer;
     
     NSMutableDictionary *_usedMethods;
+    NSMutableDictionary *_usedClasses;
+
 }
 
 - (id)initWithMachOFile:(CDMachOFile *)machOFile;
@@ -44,6 +46,7 @@
         _categories = [[NSMutableArray alloc] init];
         
         _usedMethods = [[NSMutableDictionary alloc] init];
+        _usedClasses = [[NSMutableDictionary alloc] init];
         _protocolUniquer = [[CDProtocolUniquer alloc] init];
     }
 
@@ -147,6 +150,22 @@
         return NO;
     }
     if ([_usedMethods objectForKey:methodName]) {
+        return YES;
+    }
+    return NO;
+}
+
+- (void)addUsedClass:(CDOCClass *)aClass {
+    if (aClass.name.length > 0) {
+        [_usedClasses setObject:aClass forKey:aClass.name];
+    }
+}
+
+- (BOOL)isUsedClass:(CDOCClass *)aClass {
+    if (aClass.name.length == 0) {
+        return NO;
+    }
+    if ([_usedClasses objectForKey:aClass.name]) {
         return YES;
     }
     return NO;

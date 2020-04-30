@@ -47,6 +47,7 @@
         CDOCClass *aClass = [self loadClassAtAddress:val];
         if (aClass != nil) {
             [self addClass:aClass withAddress:val];
+            aClass.isUsed = [self isUsedClass:aClass];
         }
     }
 }
@@ -76,7 +77,16 @@
 }
 
 - (void)loadUsedClasses {
-    
+    CDLCSegment *textSegment = [self.machOFile segmentWithName:@"__DATA"];
+    CDSection *section = [textSegment sectionWithName:@"__objc_classrefs"];
+    CDMachOFileDataCursor *cursor = [[CDMachOFileDataCursor alloc] initWithSection:section];
+    while ([cursor isAtEnd] == NO) {
+        uint64_t classAddress = [cursor readPtr];
+        CDOCClass *aClass = [self loadClassAtAddress:classAddress];
+        if (aClass != nil) {
+            [self addUsedClass:aClass];
+        }
+    }
 }
 
 - (CDOCProtocol *)protocolAtAddress:(uint64_t)address;

@@ -70,6 +70,35 @@
 
 - (void)recursivelyVisit:(CDVisitor *)visitor;
 {
+    if ([NSStringFromClass(visitor.class) isEqualToString:@"CDMultiFileVisitor"]) {
+        if ([self.name hasPrefix:@"AF"]
+            || [self.name hasPrefix:@"Ali"]
+            || [self.name hasPrefix:@"YY"]
+            || [self.name hasPrefix:@"WB"]
+            || [self.name hasPrefix:@"QQ"]
+            || [self.name hasPrefix:@"UM"]
+            || [self.name hasPrefix:@"LOT"]
+            || [self.name hasPrefix:@"SVG"]
+            || [self.name hasPrefix:@"SD"]
+            || [self.name hasPrefix:@"RCT"]
+            || [self.name hasPrefix:@"JD"]
+            || [self.name hasPrefix:@"FM"]
+            || [self.name hasPrefix:@"FLEX"]
+            || [self.name hasPrefix:@"GCD"]
+            || [self.name hasPrefix:@"TX"]
+            || [self.name hasPrefix:@"BM"]) {
+            return;
+        }
+        if (!self.isUsed) {
+            if (![self.name.lowercaseString containsString:@"viewcontroller"]
+                && (![self.superClassName isEqualToString:@"MFWModelItem"])
+                && (![self.superClassName isEqualToString:@"MFWModelItemWithId"])) {
+                NSLog(@"unused class: %@",self.name);
+            }
+            return;
+        }
+    }
+    
     if (!self.shouldRecursivelyVisit) {
         return;
     }
@@ -107,31 +136,5 @@
         return @[];
 
     return @[self.superClassName];
-}
-
-- (BOOL)shouldRecursivelyVisit {
-    BOOL shouldRecursivelyVisit = [super shouldRecursivelyVisit];
-    if (shouldRecursivelyVisit == NO) {
-        return shouldRecursivelyVisit;
-    }
-    if ([self.name hasPrefix:@"AF"]
-        || [self.name hasPrefix:@"Ali"]
-        || [self.name hasPrefix:@"YY"]
-        || [self.name hasPrefix:@"WB"]
-        || [self.name hasPrefix:@"QQ"]
-        || [self.name hasPrefix:@"UM"]
-        || [self.name hasPrefix:@"LOT"]
-        || [self.name hasPrefix:@"SVG"]
-        || [self.name hasPrefix:@"SD"]
-        || [self.name hasPrefix:@"RCT"]
-        || [self.name hasPrefix:@"JD"]
-        || [self.name hasPrefix:@"FM"]
-        || [self.name hasPrefix:@"FLEX"]
-        || [self.name hasPrefix:@"GCD"]
-        || [self.name hasPrefix:@"TX"]
-        || [self.name hasPrefix:@"BM"]) {
-        return NO;
-    }
-    return shouldRecursivelyVisit;
 }
 @end

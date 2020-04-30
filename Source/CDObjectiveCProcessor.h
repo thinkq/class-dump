@@ -39,6 +39,9 @@
 - (void)loadUsedMethods;
 - (void)loadUsedClasses;
 
+- (void)addUsedClass:(CDOCClass *)aClass;
+- (BOOL)isUsedClass:(CDOCClass *)aClass;
+
 - (void)registerTypesWithObject:(CDTypeController *)typeController phase:(NSUInteger)phase;
 - (void)recursivelyVisit:(CDVisitor *)visitor;
 
